@@ -1,0 +1,7 @@
+Example code from previous work:
+-----
+    curly= ("curl -i -XPOST 'http://admin:password@localhost:8086/write?db=database_name&precision=ms' --data-binary 'balances,account=%s value=%s,other=%s %s'" % (matchObj102[0][0],matchObj102[1][1],matchObj102[2][1],wilmcd_gdate))
+-----
+    from subprocess import call
+    status = call(curly, shell=True)
+----
