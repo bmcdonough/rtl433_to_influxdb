@@ -21,3 +21,12 @@ Tuned to 433.920MHz.
 {"time" : "2019-01-28 08:36:42", "model" : "LaCrosse TX141TH-Bv2 sensor", "id" : 44, "temperature_C" : 18.300, "humidity" : 44, "battery" : "OK", "test" : "No"}
 {"time" : "2019-01-28 08:36:52", "model" : "LaCrosse TX141TH-Bv2 sensor", "id" : 82, "temperature_C" : 10.700, "humidity" : 32, "battery" : "OK", "test" : "No"}
 ```
+```
+pi@pi-a020d3-1375f082:~/github/rtl433_to_influxdb $ rtl_433 -R 73 -F json |./bmcd.py 
+...
+Idle for too long; doing some other stuff.
+Workin' it! {"time" : "2019-01-28 10:25:31", "model" : "LaCrosse TX141TH-Bv2 sensor", "id" : 247, "temperature_C" : -2.900, "humidity" : 55, "battery" : "OK", "test" : "No"}
+###DEBUG is_json()
+True
+Done
+```
