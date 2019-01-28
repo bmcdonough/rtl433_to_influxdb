@@ -24,10 +24,30 @@
  SOFTWARE.
 """
 
+import sys
+import json
+
+def is_json(myjson):
+  print "###DEBUG is_json()"
+  try:
+    json_object = json.loads(myjson)
+  except ValueError, e:
+    return False
+  return True
+
+def read_stdin():
+    print "###DEBUG read_stdin()"
+    for line in sys.stdin:
+        print line
+        print is_json(line)
+    return None
+
 def main():
+    print "###DEBUG main()"
+    read_stdin()
     return None
 
 
-in __name__ == '__main__':
+if __name__ == '__main__':
   main()
 
