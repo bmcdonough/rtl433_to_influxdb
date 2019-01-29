@@ -7,36 +7,49 @@ Example code from previous work:
 ----
 influx retention
 
-CREATE DATABASE rtlamr
 
-ALTER RETENTION POLICY "autogen" ON "rtlamr" DURATION 1w REPLICATION 1 SHARD DURATION 1h DEFAULT
-CREATE RETENTION POLICY "30d_1h"  ON "rtlamr" DURATION 30d REPLICATION 1 SHARD DURATION 1d
-CREATE RETENTION POLICY "5y_1d"  ON "rtlamr" DURATION 1825d REPLICATION 1 SHARD DURATION 30d
+CREATE DATABASE rtl433_temp
 
+ALTER RETENTION POLICY "autogen" ON "rtl433_temp" DURATION 1w REPLICATION 1 SHARD DURATION 5m DEFAULT
+CREATE RETENTION POLICY "30d_1h"  ON "rtl433_temp" DURATION 30d REPLICATION 1 SHARD DURATION 1h
+CREATE RETENTION POLICY "3y_1d"  ON "rtl433_temp" DURATION 1095d REPLICATION 1 SHARD DURATION 1d
 
 
 -- Aggregate cumulative data into 1h intervals. Look at the non-negative difference
 -- between the largest consumption value 1h apart.
 
-CREATE CONTINUOUS QUERY "1h_power" ON "rtlamr"
-RESAMPLE EVERY 1h FOR 4h
+CREATE CONTINUOUS QUERY "1h_therm" ON "rtl433_temp"
+RESAMPLE EVERY 5m FOR 1h
 BEGIN
-	SELECT sum("consumption") AS "consumption"
-	INTO "30d_1h"."power"
-	FROM "autogen"."rtlamr"
+	SELECT mean("temperature") AS "temperature"
+	INTO "30d_1h"."therm"
+	FROM "autogen"."rtl433_temp"
+	WHERE "msg_type" = 'differential'
+	GROUP BY time(5m), *
+	TZ('America/New_York')
+END
+
+CREATE CONTINUOUS QUERY "1d_therm" ON "rtl433_temp"
+RESAMPLE EVERY 1h FOR 1d
+BEGIN
+	SELECT mean("temperature") AS "temperature"
+	INTO "3y_1d"."therm"
+	FROM "30d_1h"."therm"
 	WHERE "msg_type" = 'differential'
 	GROUP BY time(1h), *
 	TZ('America/New_York')
 END
 
-CREATE CONTINUOUS QUERY "1d_power" ON "rtlamr"
-RESAMPLE EVERY 1d FOR 2d
-BEGIN
-	SELECT sum("consumption") AS "consumption"
-	INTO "5y_1d"."power"
-	FROM "30d_1h"."power"
-	WHERE "msg_type" = 'differential'
-	GROUP BY time(1d), *
-	TZ('America/New_York')
-END
+
+Timeframe	Value Granularity
+day	5 minutes
+week	30 minutes
+month	2 hours
+year	1 day
+
+
+CREATE CONTINUOUS QUERY "1h_therm" ON "rtl433_temp" RESAMPLE EVERY 5m FOR 1h BEGIN SELECT mean("temperature") AS "temperature" INTO "30d_1h"."therm" FROM "autogen"."rtl433_temp" WHERE "msg_type" = 'differential' GROUP BY time(5m), * TZ('America/New_York') END
+CREATE CONTINUOUS QUERY "1d_therm" ON "rtl433_temp" RESAMPLE EVERY 1h FOR 1d BEGIN SELECT mean("temperature") AS "temperature" INTO "3y_1d"."therm" FROM "30d_1h"."therm" WHERE "msg_type" = 'differential' GROUP BY time(1h), * TZ('America/New_York') END
+
+
 

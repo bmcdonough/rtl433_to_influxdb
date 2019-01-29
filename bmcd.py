@@ -10,6 +10,17 @@ read_list = [sys.stdin]
 timeout = 0.1 # seconds
 last_work_time = time.time()
 
+db_name = "rtl433_temp"
+influx_host = "http://admin@:password@192.168.100.1:8086/write?db=%s&precision=s" % (db_name)
+print("###DEBUG influx_host: ", influx_host)
+
+
+def write_influx(key_values):
+    for key, value in key_values.items():
+        curly= ("curl -i -XPOST 'http://admin:password@localhost:8086/write?db=database_name&precision=ms' --data-binary 'balances,account=%s value=%s,other=%s %s'" % (matchObj102[0][0],matchObj102[1][1],matchObj102[2][1],wilmcd_gdate))
+    from subprocess import call
+    status = call(curly, shell=True)
+    return (status)
 
 def convert_temp(temp, unit):
     unit = unit.lower()
