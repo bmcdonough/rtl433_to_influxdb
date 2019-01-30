@@ -11,13 +11,13 @@ timeout = 0.1 # seconds
 last_work_time = time.time()
 
 db_name = "rtl433_temp"
-influx_host = "http://admin@:password@192.168.100.1:8086/write?db=%s&precision=s" % (db_name)
+influx_host = "http://admin:password@192.168.100.1:8086/write?db=%s&precision=s" % (db_name)
 print("###DEBUG influx_host: ", influx_host)
 
 
-def write_influx(key_values):
-    for key, value in key_values.items():
-        curly= ("curl -i -XPOST 'http://admin:password@localhost:8086/write?db=database_name&precision=ms' --data-binary 'balances,account=%s value=%s,other=%s %s'" % (matchObj102[0][0],matchObj102[1][1],matchObj102[2][1],wilmcd_gdate))
+def write_influx(id, temperature, humidity):
+    curly= ("curl -i -XPOST '%s' --data-binary 'temphumid,id=%s temperature=%s,humidity=%s %s'" % (influx_host,id,temperature,humidity,int(time.time())))
+    print(curly)
     from subprocess import call
     status = call(curly, shell=True)
     return (status)
@@ -45,12 +45,22 @@ def treat_input(linein):
   print(is_json(linein))
   if is_json:
       json_object = json.loads(linein)
+      id, temp, humid = None, None, None
       for key, value in json_object.items():
           print(key, value)
+          if key == "id":
+              id=value
           if key == "temperature_C":
               temp_change = convert_temp(value, "C")
               temp_change = round(temp_change, 1)
               print("temperature_F", temp_change)
+              temp=temp_change
+          if key == "humidity":
+              humid=value
+          if all ([id, temp, humid]):
+              write_influx(id, temp, humid)
+          else:
+              print("all is False", id, temp, humid)
   time.sleep(1) # working takes time
   print('Done')
   last_work_time = time.time()
